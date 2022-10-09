@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,50 +50,120 @@ namespace WinFormsApp1
         public double montoOUT { get; set; }
         public Boolean active { get; set; }
 
-        public DateTime Hoy = DateTime.Today;
+        public Boolean dadoDeBaja { get; set; }
+
+        public DateTime Hoy = new DateTime(1999, 12, 30);
 
         public List<PlazoFijo> plazoFijoList = new List<PlazoFijo>();
+        public List<int> PFActivos = new List<int>();
 
         public static double TasaGeneral = 6.5;
 
 
         //constructor
-        public PlazoFijo(int IDPL, Usuario USUARIO, double MONTOIN)
+        public PlazoFijo(int dias, double MONTOIN, Usuario USUARIO)
         {
-            idPL = IDPL;
+
+            Hoy = DateTime.Today;
+            Random rnd = new Random();
+
+            DateTime FechaFinal = CalculadorDias(dias);
+            
+            idPL = rnd.Next();
             tasaPL = TasaGeneral;
-            fechaInicio = Hoy;
-            fechaFin = new DateTime (2099, 12, 30);
             User = USUARIO;
+            fechaInicio = Hoy;
+            fechaFin = FechaFinal;
             montoIN = MONTOIN;
-            montoOUT = CalculadorIntereses(1, MONTOIN);
-            active = false;
+            montoOUT = CalculadorIntereses(dias, MONTOIN);
+            active = true;
+            dadoDeBaja = false;
+            PFActivos.Add(idPL);
 
         }
         
 
         //metodos
 
-        public void AltaPlazoFijo(PlazoFijo PF, Usuario USUARIO, double MontoPl)
+        //dar de alta pf
+        public void AltaPlazoFijo(PlazoFijo PF, Usuario USUARIO)
         {
+            
             plazoFijoList.Add(PF);
             PF.active = true;
 
         }
 
+        //agregar metodo para vencimiento de pf
+
+        public double RevisarVencimiento()
+        {
+            Hoy = DateTime.Today;
+            double retorno = 0;
+            foreach (PlazoFijo PF in plazoFijoList)
+            {
+                
+                if(PF.fechaFin == Hoy)
+                {
+                    PF.active = false;
+                    retorno = retorno + PF.montoOUT;
+                    PFActivos.Remove(idPL);
+
+                }
+                
+            }
+            return retorno;
+        }
+
+        //baja de pf
         public void BajaPlazoFijo(int ID)
         {
             foreach (PlazoFijo PF in plazoFijoList)
             {
                 if (PF.idPL == ID)
                 {
-                    PF.active = false;
+                    DateTime vencido = PF.fechaFin.AddDays(30);
+                    if (PF.fechaFin > vencido )
+                    {
+                        PF.dadoDeBaja = true;
+                    }
                 }
                
             }
 
         }
 
+        //mostrar los plazos fijos activos
+        public List<int> MostrarPlazoFijos()
+        {
+
+
+            return PFActivos;
+        }
+
+
+
+
+        /* otra version de este metodo podria ser con strings pero es mas complejo
+         
+         public string MostrarPlazoFijos2()
+        {
+
+            if (PFActivos.Count != 0) {
+                foreach (int id in PFActivos) {
+
+                    return id.ToString();
+                } }
+            else {
+                string nohay = "no hay pfs activos";
+                return nohay;
+                    
+                    }
+        }
+         
+         */
+
+        //calcular intereses 
         public double CalculadorIntereses(int dias, double montoIN)
         {
 
@@ -103,12 +174,14 @@ namespace WinFormsApp1
             return montoOUT;
 
         }
-        public int CalculadorDias(int dias)
+
+        //calcular dias
+        public DateTime CalculadorDias(int dias)
         {
+            Hoy = DateTime.Today;
+            DateTime FechaFin = Hoy.AddDays (dias);
 
-            
-
-            return dias;
+            return FechaFin;
 
         }
     }
