@@ -76,34 +76,40 @@ namespace WinFormsApp1
             fechaFin = FechaFinal;
             montoIN = MONTOIN;
             montoOUT = CalculadorIntereses(dias, MONTOIN);
-            active = true;
+            active = false;
             dadoDeBaja = false;
             PFActivos.Add(idPL);
 
         }
         
 
-        //metodos
+        //-----------METODOS-----------
 
         //dar de alta pf
-        public void AltaPlazoFijo(PlazoFijo PF, Usuario USUARIO)
+        public Boolean AltaPlazoFijo(PlazoFijo PF, Usuario USUARIO)
         {
-            
-            plazoFijoList.Add(PF);
-            PF.active = true;
+            if (ConfirmarSaldo(USUARIO))
+            {
+                plazoFijoList.Add(PF);
+                PF.active = true;
+                return true;
+            }
+            else {
+                return false;
+            }
 
         }
 
-        //agregar metodo para vencimiento de pf
+        //vencimiento de pf, 
 
         public double RevisarVencimiento()
         {
-            Hoy = DateTime.Today;
+            DHoy = DateTime.Today;
             double retorno = 0;
             foreach (PlazoFijo PF in plazoFijoList)
             {
                 
-                if(PF.fechaFin == Hoy)
+                if(PF.fechaFin == DHoy)
                 {
                     PF.active = false;
                     retorno = retorno + PF.montoOUT;
@@ -183,6 +189,19 @@ namespace WinFormsApp1
 
             return FechaFin;
 
+        }
+
+        //confirmar monto disponible
+        public Boolean ConfirmarSaldo(Usuario USR) { 
+        
+            if(USR.Cuenta >1000)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

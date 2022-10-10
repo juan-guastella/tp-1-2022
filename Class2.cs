@@ -13,12 +13,14 @@ namespace WinFormsApp1
         public int idUsuario { get; set; }
 
         public string Password { get; set; }
+        public int Cuenta { get; set; }
 
-        public Usuario(string Nombre, int ID, string Pass )
+        public Usuario(string Nombre, int ID, string Pass, int cuenta )
         {
             this.Nombre = Nombre;
             idUsuario = ID;
             Password = Pass;
+            Cuenta = cuenta;  
 
         }
     }
